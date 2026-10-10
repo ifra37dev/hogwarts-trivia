@@ -1,0 +1,305 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome to Hogwarts | Potterhead Quiz</title>
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Georgia, serif;
+  color: #f3f0e7;
+  background: radial-gradient(ellipse at top, #155844, #071b16 70%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+}
+
+.container {
+  width: 100%;
+  max-width: 700px;
+  border: 1px solid #b8c8bf;
+  border-radius: 18px;
+  padding: 35px;
+  background: rgba(4, 20, 15, 0.92);
+  box-shadow: 0 0 35px #0008;
+}
+
+h1 {
+  text-align: center;
+  font-size: clamp(30px, 6vw, 44px);
+  margin: 8px 0;
+  color: #d8e6dc;
+}
+
+.subtitle {
+  text-align: center;
+  color: #b9c9bf;
+  margin-bottom: 28px;
+}
+
+.line {
+  height: 1px;
+  background: #708c7d;
+  margin: 20px 0;
+}
+
+#progress {
+  color: #c4d5ca;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+h2 { font-size: 23px; line-height: 1.5; }
+
+#answers {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.answer {
+  background: #102e23;
+  border: 1px solid #82998c;
+  color: #f3f0e7;
+  padding: 15px;
+  border-radius: 9px;
+  text-align: left;
+}
+
+.answer:hover:not(:disabled) {
+  background: #20533e;
+  transform: translateY(-2px);
+}
+
+.answer:disabled { cursor: default; }
+
+.correct {
+  background: #205b3c !important;
+  border-color: #a4e4b6;
+}
+
+.wrong {
+  background: #653532 !important;
+  border-color: #f0aaa3;
+}
+
+#feedback {
+  min-height: 55px;
+  line-height: 1.6;
+  margin-top: 18px;
+  color: #d4e1d8;
+}
+
+.main-btn {
+  background: #c8d7cd;
+  color: #10291e;
+  border: none;
+  border-radius: 9px;
+  padding: 14px 22px;
+  font-weight: bold;
+  margin-top: 12px;
+}
+
+.main-btn:hover { background: white; }
+
+.center { text-align: center; }
+
+.hidden { display: none; }
+
+#result h2 { font-size: 30px; }
+
+.small {
+  color: #afc1b5;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 25px;
+}
+</style>
+</head>
+<body>
+<main class="container">
+  <div class="center">THE WIZARDING WORLD</div>
+  <h1>Welcome to Hogwarts</h1>
+  <p class="subtitle">A trivia challenge for true Potterheads</p>
+  <div class="line"></div>
+
+  <section id="quiz">
+    <div id="progress"></div>
+    <h2 id="question"></h2>
+    <div id="answers"></div>
+    <div id="feedback" aria-live="polite"></div>
+    <button id="next" class="main-btn hidden">Next Question</button>
+  </section>
+
+  <section id="result" class="hidden center">
+    <h2 id="resultTitle"></h2>
+    <p id="score"></p>
+    <p id="message"></p>
+    <button class="main-btn" onclick="startQuiz()">Play Again</button>
+  </section>
+
+  <p class="small">How well do you really know the wizarding world?</p>
+</main>
+
+<script>
+const questions = [
+  {
+    q: "Who gave Harry the Marauder's Map?",
+    a: ["Sirius and Lupin", "Fred and George", "Dumbledore", "Hagrid"],
+    correct: 1,
+    why: "Fred and George Weasley gave Harry the map during his third year."
+  },
+  {
+    q: "What does R.A.B. stand for?",
+    a: ["Regulus Arcturus Black", "Ronald Arthur Brown", "Remus Andrew Black", "Rubeus Albus Black"],
+    correct: 0,
+    why: "R.A.B. was Regulus Arcturus Black, Sirius's younger brother."
+  },
+  {
+    q: "Which spell is used to summon an object?",
+    a: ["Lumos", "Expelliarmus", "Accio", "Alohomora"],
+    correct: 2,
+    why: "Accio is the Summoning Charm."
+  },
+  {
+    q: "Who teaches Harry the Patronus Charm?",
+    a: ["Alastor Moody", "Remus Lupin", "Severus Snape", "Minerva McGonagall"],
+    correct: 1,
+    why: "Remus Lupin teaches Harry to cast a Patronus in Prisoner of Azkaban."
+  },
+  {
+    q: "What is Hermione Granger's middle name?",
+    a: ["Rose", "Jane", "Jean", "Lily"],
+    correct: 2,
+    why: "Her full name is Hermione Jean Granger."
+  },
+  {
+    q: "Which Horcrux does Hermione destroy?",
+    a: ["The locket", "The diary", "The diadem", "The Hufflepuff cup"],
+    correct: 3,
+    why: "Hermione destroys Helga Hufflepuff's cup with a Basilisk fang."
+  },
+  {
+    q: "What position does Harry play in Quidditch?",
+    a: ["Keeper", "Beater", "Chaser", "Seeker"],
+    correct: 3,
+    why: "Harry is the Seeker, whose job is to catch the Golden Snitch."
+  },
+  {
+    q: "Who is the Half-Blood Prince?",
+    a: ["Tom Riddle", "Sirius Black", "Severus Snape", "Horace Slughorn"],
+    correct: 2,
+    why: "The title refers to Severus Snape."
+  },
+  {
+    q: "What guards the entrance to Ravenclaw Tower?",
+    a: ["A talking eagle knocker", "A password book", "A silver phoenix", "A moving staircase"],
+    correct: 0,
+    why: "In the books, an eagle-shaped knocker asks a riddle."
+  },
+  {
+    q: "What does Harry use to breathe underwater in the second Triwizard task?",
+    a: ["Dittany", "Gillyweed", "Mandrakes", "Fluxweed"],
+    correct: 1,
+    why: "Harry uses Gillyweed to grow gills and swim underwater."
+  }
+];
+
+let current = 0;
+let score = 0;
+let order = [];
+
+function startQuiz() {
+  current = 0;
+  score = 0;
+  order = [...questions.keys()].sort(() => Math.random() - 0.5);
+  document.getElementById("quiz").classList.remove("hidden");
+  document.getElementById("result").classList.add("hidden");
+  showQuestion();
+}
+
+function showQuestion() {
+  const item = questions[order[current]];
+  document.getElementById("progress").textContent =
+    `QUESTION ${current + 1} OF ${questions.length}  |  SCORE: ${score}`;
+  document.getElementById("question").textContent = item.q;
+  document.getElementById("feedback").textContent = "";
+  document.getElementById("next").classList.add("hidden");
+
+  const answers = document.getElementById("answers");
+  answers.innerHTML = "";
+
+  item.a.forEach((answer, index) => {
+    const button = document.createElement("button");
+    button.className = "answer";
+    button.textContent = answer;
+    button.onclick = () => chooseAnswer(index);
+    answers.appendChild(button);
+  });
+}
+
+function chooseAnswer(selected) {
+  const item = questions[order[current]];
+  const buttons = document.querySelectorAll(".answer");
+
+  buttons.forEach((button, index) => {
+    button.disabled = true;
+    if (index === item.correct) button.classList.add("correct");
+    if (index === selected && selected !== item.correct) {
+      button.classList.add("wrong");
+    }
+  });
+
+  if (selected === item.correct) {
+    score++;
+    document.getElementById("feedback").textContent =
+      "Correct! " + item.why;
+  } else {
+    document.getElementById("feedback").textContent =
+      "Not quite! " + item.why;
+  }
+
+  document.getElementById("progress").textContent =
+    `QUESTION ${current + 1} OF ${questions.length}  |  SCORE: ${score}`;
+  document.getElementById("next").classList.remove("hidden");
+}
+
+document.getElementById("next").onclick = () => {
+  current++;
+  if (current < questions.length) {
+    showQuestion();
+  } else {
+    showResult();
+  }
+};
+
+function showResult() {
+  document.getElementById("quiz").classList.add("hidden");
+  document.getElementById("result").classList.remove("hidden");
+  document.getElementById("resultTitle").textContent =
+    score >= 8 ? "Outstanding, Potterhead!" :
+    score >= 5 ? "Not bad, wizard!" : "Back to the books!";
+  document.getElementById("score").textContent =
+    `You scored ${score} out of ${questions.length}.`;
+  document.getElementById("message").textContent =
+    score === 10 ? "A perfect score. You truly know your magic." :
+    score >= 7 ? "You know your wizarding world pretty well." :
+    "There's more magic to discover. Give it another try!";
+}
+
+startQuiz();
+</script>
+</body>
+</html>
